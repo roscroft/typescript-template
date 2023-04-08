@@ -7,3 +7,5 @@ export async function main(ns: NS): Promise<void> {
 export async function testing(ns: NS): Promise<void> {
   ns.tprint("Testing!")
 }
+
+// literally what does it take to update
