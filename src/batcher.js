@@ -41,7 +41,7 @@ export async function potential_targets(ns) {
 }
 
 export async function main(ns) {
-    ns.exec("setup.js", "home")
+    ns.exec("slim_setup.js", "home")
     while (true) {
         // Get updated target list sorted by value
         //let targets = get_target_names(ns).sort((a,b) => max_money_map.get(b)-max_money_map.get(a))
@@ -66,9 +66,9 @@ export async function main(ns) {
         let all_pids = all_execs.map(exec_ => do_execs(ns, exec_))
         await ns.sleep(sleep_time + interval * 4)
         //await ns.sleep(interval)
-        ns.exec("setup.js", "home")
-        upgrade_servers(ns)
-        upgrade_home(ns)
+        ns.exec("slim_setup.js", "home")
+        //upgrade_servers(ns)
+        //upgrade_home(ns)
     }
 }
 
