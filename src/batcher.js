@@ -1,55 +1,26 @@
 /** @param {NS} ns */
 import { get_target_names, get_hack_hosts } from "./network-manager.js"
-import { upgrade_servers, upgrade_home } from "./setup.js"
 const home = "home"
 const home_ram_factor = 0.90 // limit it to 90% home ram usage!
 const away_ram_factor = 1 // remote servers get full utilization
 const interval = 500
 const scripts = ["b-weaken.js", "b-weaken.js", "b-grow.js", "b-hack.js"]
+// TODO: flags for startup, try/catch block for sizes
+//const startup_scripts = ["startup-hacks.js", "startup-singularity-backdoors.js", "startup-singularity-buys.js", "startup-transfer-scripts.js"]
 let max_money_map = new Map()
 
-function get_host_caps(ns, scripts) {
-    return get_hack_hosts(ns).reduce((acc, host) => {
-        let name = host.hostname
-        let threads = Math.floor(get_available_ram(ns, name) / get_script_ram(ns, scripts))
-        return threads >= 6 ? acc.concat([[name, threads]]) : acc
-    }, []).sort((a, b) => b[1] - a[1])
-}
-
-function check_ports(ns, active_ports) {
-    return active_ports.map(port => {
-        let data = []
-        while (ns.peek(port) != "NULL PORT DATA") {
-            data.push(ns.readPort(port))
-        }
-        return data
-    })
-}
-
-export async function max_batch(ns, target) {
-    // Figure out the threads later. Calc threads is breakdowns given a max, this is optimal batches
-    // of single-thread equivalents based solely on the target
-    //let num_batches = Math.floor(ns.getWeakenTime(target)/(4*interval)) // this is, definitively, batch cap
-    let max_hacks = ns.hackAnalyzeThreads(target, ns.getServerMaxMoney(target))
-}
-
-export async function potential_targets(ns) {
-    // broad strokes here go in value order, breaking down targets into series of thread packages based
-    // on target capacity for true batching; apportion off blocks of threads based on threads available
-    // so like 1. 100% 2. 100% 3. 40% or whatever
-
-}
-
 export async function main(ns) {
-    ns.exec("slim_setup.js", "home")
     while (true) {
+        ns.exec("startup-hacks.js", "home")
+        ns.exec("startup-transfer-scripts.js", "home")
+        ns.exec("startup-singularity-backdoors.js", "home")
+        ns.exec("startup-singularity-buys.js", "home")
+        ns.exec("startup-home-upgrade.js", "home")
+        //ns.exec("startup-buy-and-upgrade-servers.js", "home")
         // Get updated target list sorted by value
         //let targets = get_target_names(ns).sort((a,b) => max_money_map.get(b)-max_money_map.get(a))
         let targets = get_target_names(ns).sort((a,b) => ns.getServerMaxMoney(b)-ns.getServerMaxMoney(a))
-        ns.tprint(targets)
-        // Check the 
-        //let port_data = check_ports(ns, active_ports)
-        //let freed_targets = port_data.map(port => port.split(" ")[0]) // Targets freed up
+        //ns.tprint(targets)
         let sleep_time = 0
         // pass around the hosts; we need to account for losing RAM
         let hosts = get_host_caps(ns, scripts)
@@ -65,11 +36,15 @@ export async function main(ns) {
         }, [])
         let all_pids = all_execs.map(exec_ => do_execs(ns, exec_))
         await ns.sleep(sleep_time + interval * 4)
-        //await ns.sleep(interval)
-        ns.exec("slim_setup.js", "home")
-        //upgrade_servers(ns)
-        //upgrade_home(ns)
     }
+}
+
+function get_host_caps(ns, scripts) {
+    return get_hack_hosts(ns).reduce((acc, host) => {
+        let name = host.hostname
+        let threads = Math.floor(get_available_ram(ns, name) / get_script_ram(ns, scripts))
+        return threads >= 6 ? acc.concat([[name, threads]]) : acc
+    }, []).sort((a, b) => b[1] - a[1])
 }
 
 function execs_on_target(ns, target, hosts) {
@@ -116,10 +91,6 @@ function do_execs(ns, exec_args) {
     if (pid == 0) {ns.tprintf("Unsuccessful call of script %s on host %s.", script, hacker)}
     return pid
 }
-
-//function exec_maker(target, offset, hacker, batch, server_threads, writer) {
-//    return 
-//}
 
 function build_execs(target, dispatches, call_cap, batch_length, batch_cap, offset, n_ind) {
     function recurse_through_dispatches(r_dispatches, r_offset, thread_ct, batch_ct) {
@@ -247,27 +218,3 @@ export function get_time_to_value(ns, target, threads) {
     let gw_cycles = ((needed[2]+Math.ceil(ns.growthAnalyzeSecurity(needed[2]) / ns.weakenAnalyze(1)))/threads*times[2])/1000
     return w_cycles+gw_cycles
 }
-
-
-
-
-// We're looking at this wrong.
-// We don't want to go target by target, assigning hosts at the same time
-// INSTEAD
-// we want, given a list of targets in some order:
-// - the optimal threads to align against each action
-// -- complication: cores. Get around this by a single-core-thread-equivalence
-// -- e.g., "we want to assign 10 single-core threads to hack" could be "8 2-core threads"
-// -- in other words, resource allocation should take that into account. Apportion out the
-// multi-cored hosts first?
-//
-
-
-// Server maximum batches is defined by time - time from weaken start to the landing of the first hack
-// which is weaken_time - interval
-// it is in our best interest to subdivide this!
-
-// pass around a state S
-// state S has the current phase and $cost function of each server
-// e.g. : 1. n00dles, phase 2, 40
-//        2. ecorp, phase 3, 1000

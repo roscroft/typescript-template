@@ -1,8 +1,7 @@
 /** @param {NS} ns */
 export async function main(ns) {
-    //let faction = ns.args[0]
+    let faction = ns.args[0]
     //buy_all_neural(ns, faction)
-    let faction = "Daedalus"
     save(ns, faction)
 }
 
