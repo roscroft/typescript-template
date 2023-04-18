@@ -18,33 +18,22 @@ function get_host_caps(ns, scripts) {
 }
 
 export async function main(ns) {
-    ns.exec("startup-transfer-scripts.js", "home")
-    ns.exec("crimes.js", "home", 1, "$")
     while (true) {
-        ns.exec("startup-hacks.js", "home")
-        ns.exec("startup-singularity-backdoors.js", "home")
-        ns.exec("startup-singularity-buys.js", "home")
-        ns.exec("startup-home-upgrade.js", "home")
-        //ns.exec("startup-buy-and-upgrade-servers.js", "home")
-        // Get updated target list sorted by value
-        //let targets = get_target_names(ns).sort((a,b) => max_money_map.get(b)-max_money_map.get(a))
         let targets = get_target_names(ns).sort((a,b) => ns.getServerMaxMoney(b)-ns.getServerMaxMoney(a))
-        ns.tprint(targets)
         let sleep_time = 0
-        // pass around the hosts; we need to account for losing RAM
-        let hosts = get_host_caps(ns, scripts)
+        let hosts = get_host_caps(ns, scripts).filter(host => host[0] == "home") // run only on home for now
         let all_execs = targets.reduce((acc, tgt) => {
             let [execs, new_hosts] = execs_on_target(ns, tgt, hosts)
             if (execs.length > 0) {
                 hosts = new_hosts
-                let wait = get_times(ns, tgt)[0] + execs.reduce((a, n) => Math.max(a, n[5]), 0)
-                sleep_time = sleep_time > wait ? sleep_time : wait
+                //let wait = get_times(ns, tgt)[0] + execs.reduce((a, n) => Math.max(a, n[5]), 0)
+                //sleep_time = sleep_time > wait ? sleep_time : wait
                 return [...acc, ...execs]
             }
             return acc
         }, [])
         let all_pids = all_execs.map(exec_ => do_execs(ns, exec_))
-        await ns.sleep(sleep_time + interval * 4)
+        //await ns.sleep(sleep_time + interval * 4)
     }
 }
 
