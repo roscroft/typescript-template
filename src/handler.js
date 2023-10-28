@@ -39,7 +39,7 @@ async function port_reader(ns) {
     else if (written_actions == null) ns.tprint("Action list empty.")
 
     // Wait a cycle
-    await ns.sleep(TICKRATE)
+    await ns.nextWrite()
     counter += 1
   }
 }

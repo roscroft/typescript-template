@@ -57,8 +57,10 @@ export function action_needed(threads) {
     else return "hack"
 }
 
-export function calc_threads(ns, target, hacker, threads) {
+export function calc_threads(ns, target, hacker, hack_threads) {
     let cores = ns.getServer(hacker).cpuCores
+    let threads = [0,0,0,0]
+    threads[3] = hack_threads
     threads[2] = Math.ceil(ns.growthAnalyze(target, 1 / (1 - (ns.hackAnalyze(target) * threads[3])), cores))
     threads[1] = Math.ceil(ns.growthAnalyzeSecurity(threads[2]) / ns.weakenAnalyze(1, cores))
     threads[0] = Math.ceil(ns.hackAnalyzeSecurity(threads[3], target) / ns.weakenAnalyze(1, cores))
@@ -77,6 +79,18 @@ export function max_supported_hacks(ns, target) {
     return Math.floor(1/ns.hackAnalyze(target))
 }
 
-export function earned_money(ns, target, threads) {
+export function earned_money(ns, target, hack_threads) {
+    return ns.hackAnalyze(target)*ns.getServerMaxMoney(target)*hack_threads
+}
 
+export function money_per_ram(ns, target, hacker, hack_threads) {
+    return earned_money(ns, target, hack_threads)/ram_used(ns, calc_threads(ns, target, hacker, hack_threads))
+}
+
+export function best_money_and_threads(ns, target, hacker, max_threads) {
+    return Array.from(Array(max_threads), (e,i)=>i+1).reduce((acc, val, ind) => {
+        let money_from_val = money_per_ram(ns, target, hacker, val) 
+        if (money_from_val > acc[1]) return [ind+1, money_from_val]
+        return acc
+    }, [0,0])
 }
