@@ -3,6 +3,8 @@ This guide is mostly focused on Windows users (Mac instructions are given at som
 If you're a Linux/Mac/Other user, there's an expectancy that you know your system and it's peculiarities compared to Windows.
 If you need help with your particular system, feel free to ask for help in the Official Bitburner Discord.
 
+Alternatively if you are familiar with docker, see [Docker install guide](DockerGuide.md) (optional) that installs nodejs and the Remote File API in an isolated container.
+
 ### 1. Backup your savegame (just in case) 
 - Augmentations -> Backup save
 
@@ -44,9 +46,7 @@ If you need help with your particular system, feel free to ask for help in the O
 - You should see a NetscriptDefinitions.d.ts automatically appear in the folder on your computer (ex. `C:\Users\yourusername\Workspace\BitburnerScripts\NetscriptDefinitions.d.ts`).
 
 ### 9. Try some other files too!
-- Copy/create a .js to the `src` folder on your computer and check Bitburner. The file should be transferred!
-- Copy/create a .txt in the `src` folder will be transferred as well now.
-
+- Copy/create a .js or .ts file to the `src` folder on your computer and check Bitburner. The file should be transferred!
 	
 ### 10. Thats it!
 - You can now make and edit the files in the `src` directory to your liking, and have them be changed in Bitburner automatically.
